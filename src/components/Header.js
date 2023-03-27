@@ -11,28 +11,37 @@ import {
 	signOut,
 } from 'firebase/auth';
 import google from "../google.png"
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 function Header() {
 	const [user, setUser] = useState(null);
+	const [userIdToken, setUserIdToken] = useState(null);
 
 	useEffect(() => {
-
 		// listens to changes in current auth state
 		const unsubscribe = onAuthStateChanged(auth, (user) => {
-			setUser(user ? user : null);
+			setUser(user ? { ...user } : null);
 		});
 
 		// removes listener when component is unmounted
 		return unsubscribe;
-	}, []);
+	}, [userIdToken]);
 
+	console.log("seessiomn", userIdToken)
     
-	function handleLogin() {
+	async function handleLogin() {
 		const provider = new GoogleAuthProvider();
-		return signInWithPopup(auth, provider);
+		const userCredential = await signInWithPopup(auth, provider);
+		const idToken = await userCredential.user.getIdToken();
+		setUserIdToken(idToken);
+		cookies.set('sessionToken', idToken, { path: '/' });
 	}
 
 	async function handleLogout() {
+		// remove the session token cookie
+		cookies.remove('sessionToken', { path: '/' });
 		return await signOut(auth);
 	}
 
