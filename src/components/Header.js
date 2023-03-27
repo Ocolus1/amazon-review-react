@@ -29,7 +29,6 @@ function Header() {
 		return unsubscribe;
 	}, [userIdToken]);
 
-	console.log("seessiomn", userIdToken)
     
 	async function handleLogin() {
 		const provider = new GoogleAuthProvider();
